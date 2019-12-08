@@ -2,16 +2,13 @@ import React, {Component} from 'react';
 import Row from "./Row";
 
 class Board extends Component {
-    constructor(props) {
-        super(props);
+    state = {
+        rows: this.createBoard(this.props),
+        isLose: false,
+        isWin: false
+    };
 
-        this.state = {
-            rows: this.createBoard(props),
-            isLose: false,
-            isWin: false
-        };
-        this.openedCell = 0;
-    }
+    openedCell = 0;
 
     createBoard(props) {
         let board = [];
@@ -30,6 +27,12 @@ class Board extends Component {
             }
         }
 
+        this.setMines(props, board);
+
+        return board;
+    }
+
+    setMines(props, board) {
         for (let i = 0; i < props.mines; i++) {
             const row = Math.floor(Math.random() * props.rows);
             const col = Math.floor(Math.random() * props.cols);
@@ -41,7 +44,6 @@ class Board extends Component {
                 cell.mines = true;
             }
         }
-        return board;
     }
 
     openCell(cell) {
@@ -54,28 +56,17 @@ class Board extends Component {
 
         const currentCell = rows[cell.y][cell.x];
 
-        if(!currentCell.open) {
-            if (currentCell.mines) {
-                currentCell.open = true;
-                this.openedCell = 0;
-                this.setState({
-                    isLose: true,
-                });
-            } else {
-                currentCell.open = true;
-                currentCell.count = minesCount;
+        this.loseGame(currentCell);
 
-                this.openedCell++;
+        if (!currentCell.open && !currentCell.mines) {
+            currentCell.open = true;
+            currentCell.count = minesCount;
 
-                if (this.openedCell === (this.props.rows * this.props.cols - this.props.mines)) {
-                    this.openedCell = 0;
-                    this.setState({
-                        isWin: true,
-                    });
-                }
+            this.openedCell++;
 
-                this.setState(rows);
-            }
+            this.winGame();
+
+            this.setState(rows);
         }
     };
 
@@ -95,6 +86,25 @@ class Board extends Component {
         }
 
         return minesCount;
+    }
+
+    loseGame(cell) {
+        if (!cell.open && cell.mines) {
+            cell.open = true;
+            this.openedCell = 0;
+            this.setState({
+                isLose: true,
+            });
+        }
+    }
+
+    winGame() {
+        if (this.openedCell === (this.props.rows * this.props.cols - this.props.mines)) {
+            this.openedCell = 0;
+            this.setState({
+                isWin: true,
+            });
+        }
     }
 
     resetBoard() {

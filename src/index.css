@@ -62,7 +62,7 @@ body {
     background-color: #FF0000;
 }
 
-.minesweeper__cell--mine svg {
+.minesweeper__mine-svg {
     fill: #000;
     width: 20px;
     height: 20px;
